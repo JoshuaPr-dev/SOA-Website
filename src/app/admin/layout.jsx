@@ -2,6 +2,7 @@ import AdminGuard from "./AdminGuard";
 import AdminLogout from "../../../components/AdminLogout";
 
 export default function AdminLayout({ children }) {
+  console.log("✅ AdminLayout monté");
   return (
     <div className="divAdmin">
       <div className="divAdminFlex">
