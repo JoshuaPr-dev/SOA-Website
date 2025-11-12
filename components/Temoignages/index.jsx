@@ -53,18 +53,20 @@ export default function Temoignages() {
             {temoignages.map((t) => (
               <div key={t.id} className="divTailleBloc">
                 {t.photo_url ? (
-                  <img
-                    src={t.photo_url}
-                    alt={`Photo de ${t.nom}`}
-                    onError={(e) => {
-                      console.error(
-                        "Erreur de chargement de l'image:",
-                        t.photo_url
-                      );
-                      e.target.style.display = "none";
-                    }}
-                    className="imgTemoignages"
-                  />
+                  <div className="photo-wrapper">
+                    <img
+                      src={t.photo_url}
+                      alt={`Photo de ${t.nom}`}
+                      onError={(e) => {
+                        console.error(
+                          "Erreur de chargement de l'image:",
+                          t.photo_url
+                        );
+                        e.target.style.display = "none";
+                      }}
+                      className="imgTemoignages"
+                    />
+                  </div>
                 ) : (
                   <div>
                     <h2 className="h2">{t.nom[0]}</h2>

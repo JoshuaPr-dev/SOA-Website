@@ -42,7 +42,8 @@ export default function Contact() {
     setStatus("Envoi en cours...");
 
     const payload = {
-      name: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
       email: formData.email,
       message: formData.message,
     };
