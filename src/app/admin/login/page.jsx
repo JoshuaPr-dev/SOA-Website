@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "@/components/supabase-provider";
+import { useSupabase } from "../../../context/supabase-provider";
 
 import Header from "../../../../components/Header/index";
 import Footer from "../../../../components/Footer/index";
@@ -13,7 +13,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const supabase = useSupabase(); 
+  const { supabase } = useSupabase();
 
   const handleLogin = async (e) => {
     e.preventDefault();

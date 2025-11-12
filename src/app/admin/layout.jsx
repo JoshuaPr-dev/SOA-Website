@@ -1,17 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSupabase } from "@/components/supabase-provider";
+import { useSupabase } from "../../context/supabase-provider";
 import AdminLogout from "../../../components/AdminLogout";
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = useSupabase(); // ✅ utilisation du provider
+  const { supabase, session } = useSupabase(); 
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // ✅ On ne vérifie pas l'auth sur la page login
     if (pathname === "/admin/login") {
       setChecking(false);
       return;
@@ -20,7 +19,7 @@ export default function AdminLayout({ children }) {
     const checkAuth = async () => {
       try {
         const {
-          data: { session },
+          data: { session: activeSession },
           error,
         } = await supabase.auth.getSession();
 
@@ -28,7 +27,7 @@ export default function AdminLayout({ children }) {
           console.error("Erreur Supabase :", error.message);
         }
 
-        if (!session) {
+        if (!activeSession) {
           router.replace("/admin/login");
         }
       } catch (err) {
