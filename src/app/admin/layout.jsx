@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
-
 import AdminLogout from "../../../components/AdminLogout";
 
 export default function AdminLayout({ children }) {
@@ -20,13 +19,19 @@ export default function AdminLayout({ children }) {
       try {
         const {
           data: { session },
+          error,
         } = await supabase.auth.getSession();
-        if (!session) {
-          router.push("/admin/login");
+
+        if (error) {
+          console.error("Erreur Supabase:", error.message);
         }
-      } catch (error) {
-        console.error("Erreur lors de la vérification de l'authentification:", error);
-        router.push("/admin/login");
+
+        if (!session) {
+          router.replace("/admin/login"); 
+        }
+      } catch (err) {
+        console.error("Erreur lors de la vérification de session:", err);
+        router.replace("/admin/login");
       } finally {
         setChecking(false);
       }
@@ -35,7 +40,8 @@ export default function AdminLayout({ children }) {
     checkAuth();
   }, [pathname, router]);
 
-  if (checking) return <div>CHARGEMENT...</div>;
+  if (checking)
+    return <div className="loadingAdmin">Chargement en cours...</div>;
 
   return (
     <div className="divAdmin">
