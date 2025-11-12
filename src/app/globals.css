@@ -52,7 +52,7 @@ nav ul {
 .logo {
   width: 2.25rem;
   height: auto;
-  margin-left: 18px;
+  margin-left: 48px;
 }
 
 .buttonContact1 {
@@ -794,6 +794,12 @@ nav ul {
   }
 }
 /* Fin Carousel -375px  */
+
+@media (min-width: 424px) {
+  .logo {
+    margin-left: 52px;
+  }
+}
 
 /* MedyaQuery avant Tablette pour enlever le menu burger  */
 @media (max-width: 767px) {
