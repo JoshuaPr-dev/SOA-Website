@@ -9,9 +9,18 @@ export async function GET() {
 
     await supabase.auth.signOut();
 
-    return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"));
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://strengthoptimizationacademy.com"
+        : "http://localhost:3000");
+
+    return NextResponse.redirect(new URL("/", baseUrl));
   } catch (err) {
-    console.error("Erreur de déconnexion", err);
-    return NextResponse.json({ error: "Echec de la deconnexion" }, { status: 500 });
+    console.error("Erreur de déconnexion :", err);
+    return NextResponse.json(
+      { error: "Échec de la déconnexion" },
+      { status: 500 }
+    );
   }
 }

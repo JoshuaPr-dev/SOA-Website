@@ -13,7 +13,6 @@ export async function middleware(req) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        // Next.js middleware Request cookies API
         get: (name) => {
           const c = req.cookies.get?.(name);
           return c ? c.value : undefined;
