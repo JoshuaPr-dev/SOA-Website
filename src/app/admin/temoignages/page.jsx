@@ -19,7 +19,7 @@ export default function AdminTemoignages() {
   });
   const [editing, setEditing] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [checkingSession, setCheckingSession] = useState(true); // 👈 ajouté
+  const [checkingSession, setCheckingSession] = useState(true); 
 
   useEffect(() => {
     const checkSession = async () => {
