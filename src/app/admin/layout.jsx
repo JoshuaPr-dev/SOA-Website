@@ -7,7 +7,7 @@ import AdminLogout from "../../../components/AdminLogout";
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { supabase } = useSupabase();
+  const { supabase, session } = useSupabase();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -16,23 +16,32 @@ export default function AdminLayout({ children }) {
       return;
     }
 
-    const checkAuth = async () => {
+    const verifySession = async () => {
       try {
-        await new Promise((r) => setTimeout(r, 300));
+        await new Promise((r) => setTimeout(r, 600));
+
         const {
-          data: { session },
+          data: { session: activeSession },
         } = await supabase.auth.getSession();
-        if (!session) router.replace("/admin/login");
+
+        if (!activeSession) {
+          // Pas de session → retour login
+          router.replace("/admin/login");
+        }
+      } catch (err) {
+        console.error("Erreur vérification session :", err);
+        router.replace("/admin/login");
       } finally {
         setChecking(false);
       }
     };
 
-    checkAuth();
-  }, [pathname, router, supabase]);
+    verifySession();
+  }, [pathname, supabase, router]);
 
-  if (checking)
+  if (checking) {
     return <div className="loadingAdmin">Chargement en cours...</div>;
+  }
 
   return (
     <div className="divAdmin">
