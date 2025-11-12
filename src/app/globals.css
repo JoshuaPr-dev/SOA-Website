@@ -805,13 +805,13 @@ nav ul {
   #icons:before {
     content: "\2630";
     font-weight: 500;
-    font-size: 22px;
+    font-size: 25px;
   }
 
   .active #icons:before {
     content: "\2715";
     font-weight: 500;
-    font-size: 22px;
+    font-size: 25px;
   }
 
   nav ul {
