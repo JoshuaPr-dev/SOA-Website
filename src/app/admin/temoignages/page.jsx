@@ -19,16 +19,25 @@ export default function AdminTemoignages() {
   });
   const [editing, setEditing] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(true); // 👈 ajouté
 
   useEffect(() => {
-    if (!session) {
-      router.replace("/admin/login");
-      return;
-    }
-    fetchTemoignages();
+    const checkSession = async () => {
+      if (session === undefined) return; 
+
+      if (!session) {
+        router.replace("/admin/login");
+      } else {
+        await fetchTemoignages();
+      }
+      setCheckingSession(false);
+    };
+
+    checkSession();
   }, [session, router]);
 
   const fetchTemoignages = async () => {
+    setLoading(true);
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
@@ -44,7 +53,7 @@ export default function AdminTemoignages() {
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
 
-    const { data, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("testimonials-photos")
       .upload(fileName, file);
 
@@ -105,6 +114,9 @@ export default function AdminTemoignages() {
       setEditing(null);
     }
   };
+
+  if (checkingSession)
+    return <div className="p">Vérification de la session en cours...</div>;
 
   if (!session) return null;
 
