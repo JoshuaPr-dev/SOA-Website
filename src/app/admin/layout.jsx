@@ -1,16 +1,12 @@
-import AdminGuard from "./AdminGuard";
-import AdminLogout from "../../../components/AdminLogout";
+"use client";
+import { SupabaseProvider } from "@/context/supabase-provider";
 
-export default function AdminLayout({ children }) {
+export default function RootLayout({ children }) {
   return (
-    <div className="divAdmin">
-      <div className="divAdminFlex">
-        <h2 className="h2">ADMIN</h2>
-        <AdminLogout />
-      </div>
-      <main>
-        <AdminGuard>{children}</AdminGuard>
-      </main>
-    </div>
+    <html lang="fr">
+      <body>
+        <SupabaseProvider>{children}</SupabaseProvider>
+      </body>
+    </html>
   );
 }
