@@ -8,20 +8,24 @@ export const SupabaseProvider = ({ children }) => {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data?.session ?? null);
+    const syncSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setSession(session ?? null);
     };
 
-    getSession();
+    syncSession();
 
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        setSession(newSession);
       }
     );
 
-    return () => subscription?.subscription?.unsubscribe();
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   return (
