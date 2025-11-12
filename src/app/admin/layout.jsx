@@ -9,7 +9,7 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const { supabase, session } = useSupabase(); 
   const [checking, setChecking] = useState(true);
-
+  
   useEffect(() => {
     if (pathname === "/admin/login") {
       setChecking(false);
@@ -22,6 +22,10 @@ export default function AdminLayout({ children }) {
           data: { session: activeSession },
           error,
         } = await supabase.auth.getSession();
+
+        // 🧠 ➜ Ajoute ce log pour voir ce que Supabase te renvoie
+        console.log("SESSION SUPABASE :", activeSession);
+        console.log("ERREUR SUPABASE :", error);
 
         if (error) {
           console.error("Erreur Supabase :", error.message);
@@ -54,3 +58,5 @@ export default function AdminLayout({ children }) {
     </div>
   );
 }
+
+
