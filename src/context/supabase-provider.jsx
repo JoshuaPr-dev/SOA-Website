@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/utils/supabaseClient"; // ✅ on importe le client existant
+import { supabase } from "@/utils/supabaseClient";
 
 const SupabaseContext = createContext();
 
@@ -21,9 +21,7 @@ export const SupabaseProvider = ({ children }) => {
       }
     );
 
-    return () => {
-      subscription?.subscription?.unsubscribe();
-    };
+    return () => subscription?.subscription?.unsubscribe();
   }, []);
 
   return (

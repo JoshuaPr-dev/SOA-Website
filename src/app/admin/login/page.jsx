@@ -32,31 +32,24 @@ export default function AdminLogin() {
         password,
       });
 
-      console.log("Résultat de la connexion :", { data, error });
-
       if (error) {
-        if (error.message?.toLowerCase().includes("invalid")) {
-          setError(
-            "Identifiants invalides — vérifie l'email et le mot de passe."
-          );
-        } else {
-          setError(error.message || "Erreur lors de la connexion.");
-        }
+        setError(
+          error.message?.toLowerCase().includes("invalid")
+            ? "Identifiants invalides — vérifie l'email et le mot de passe."
+            : error.message || "Erreur lors de la connexion."
+        );
         setLoading(false);
         return;
       }
 
       if (data?.session) {
-        console.log("✅ Connexion réussie, redirection en cours...");
-        // Attendre un peu pour laisser Supabase enregistrer la session
         setTimeout(() => {
           router.replace("/admin/temoignages");
-        }, 800);
+        }, 600);
       } else {
         setError("La session n’a pas pu être créée. Réessaie.");
       }
-    } catch (err) {
-      console.error("Erreur inattendue :", err);
+    } catch {
       setError("Erreur réseau ou inconnue.");
     } finally {
       setLoading(false);
@@ -109,3 +102,4 @@ export default function AdminLogin() {
     </div>
   );
 }
+ 

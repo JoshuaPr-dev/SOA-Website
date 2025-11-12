@@ -20,14 +20,11 @@ export default function AdminTemoignages() {
   const [editing, setEditing] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
-  // ✅ Vérifie la session et charge les témoignages
   useEffect(() => {
     if (!session) {
-      console.log("❌ Aucune session, redirection vers /admin/login");
       router.replace("/admin/login");
       return;
     }
-
     fetchTemoignages();
   }, [session, router]);
 
@@ -42,27 +39,22 @@ export default function AdminTemoignages() {
   };
 
   const uploadPhoto = async (file) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)}.${fileExt}`;
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}.${fileExt}`;
 
-      const { data, error: uploadError } = await supabase.storage
-        .from("testimonials-photos")
-        .upload(fileName, file);
+    const { data, error: uploadError } = await supabase.storage
+      .from("testimonials-photos")
+      .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+    if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("testimonials-photos")
-        .getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage
+      .from("testimonials-photos")
+      .getPublicUrl(fileName);
 
-      return urlData.publicUrl;
-    } catch (error) {
-      console.error("Erreur uploadPhoto:", error);
-      throw error;
-    }
+    return urlData.publicUrl;
   };
 
   const handleAdd = async (e) => {
@@ -75,27 +67,18 @@ export default function AdminTemoignages() {
         photoUrl = await uploadPhoto(newTemoignage.photo);
       }
 
-      const testimonialData = {
-        nom: newTemoignage.nom,
-        message: newTemoignage.message,
-        photo_url: photoUrl,
-      };
-
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("testimonials")
-        .insert([testimonialData])
+        .insert([
+          {
+            nom: newTemoignage.nom,
+            message: newTemoignage.message,
+            photo_url: photoUrl,
+          },
+        ])
         .select();
 
-      if (error) {
-        console.error("Erreur d'insertion", error);
-        return;
-      }
-
-      if (data?.length) {
-        setTemoignages([data[0], ...temoignages]);
-      }
-    } catch (err) {
-      console.error("Erreur ajout témoignage:", err);
+      if (data?.length) setTemoignages([data[0], ...temoignages]);
     } finally {
       setNewTemoignage({ nom: "", message: "", photo: null });
       setPhotoPreview(null);
@@ -103,23 +86,17 @@ export default function AdminTemoignages() {
   };
 
   const handleDelete = async (id) => {
-    const { error } = await supabase.from("testimonials").delete().eq("id", id);
-    if (error) return console.error("Erreur suppression:", error);
+    await supabase.from("testimonials").delete().eq("id", id);
     setTemoignages(temoignages.filter((t) => t.id !== id));
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("testimonials")
       .update({ nom: editing.nom, message: editing.message })
       .eq("id", editing.id)
       .select();
-
-    if (error) {
-      console.error("Erreur mise à jour:", error);
-      return;
-    }
 
     if (data?.length) {
       setTemoignages(
@@ -141,38 +118,35 @@ export default function AdminTemoignages() {
         onSubmit={editing ? handleUpdate : handleAdd}
         className="formAdminTemoignages"
       >
-        <div>
-          <input
-            type="text"
-            placeholder="Nom"
-            value={editing ? editing.nom : newTemoignage.nom}
-            onChange={(e) =>
-              editing
-                ? setEditing({ ...editing, nom: e.target.value })
-                : setNewTemoignage({ ...newTemoignage, nom: e.target.value })
-            }
-            className="inputAdminTemoignagesNom"
-          />
-        </div>
-        <div>
-          <textarea
-            placeholder="Message"
-            value={editing ? editing.message : newTemoignage.message}
-            onChange={(e) =>
-              editing
-                ? setEditing({ ...editing, message: e.target.value })
-                : setNewTemoignage({
-                    ...newTemoignage,
-                    message: e.target.value,
-                  })
-            }
-            rows={7}
-            className="inputAdminTemoignagesMessage"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Nom"
+          value={editing ? editing.nom : newTemoignage.nom}
+          onChange={(e) =>
+            editing
+              ? setEditing({ ...editing, nom: e.target.value })
+              : setNewTemoignage({ ...newTemoignage, nom: e.target.value })
+          }
+          className="inputAdminTemoignagesNom"
+        />
+
+        <textarea
+          placeholder="Message"
+          value={editing ? editing.message : newTemoignage.message}
+          onChange={(e) =>
+            editing
+              ? setEditing({ ...editing, message: e.target.value })
+              : setNewTemoignage({
+                  ...newTemoignage,
+                  message: e.target.value,
+                })
+          }
+          rows={7}
+          className="inputAdminTemoignagesMessage"
+        />
 
         {!editing && (
-          <div>
+          <>
             <input
               type="file"
               accept="image/*"
@@ -192,7 +166,7 @@ export default function AdminTemoignages() {
                 className="imgAdminTemoignages"
               />
             )}
-          </div>
+          </>
         )}
 
         <button type="submit" className="buttonAdminTemoignages buttonHover">
