@@ -23,10 +23,6 @@ export default function AdminLayout({ children }) {
           error,
         } = await supabase.auth.getSession();
 
-        // 🧠 ➜ Ajoute ce log pour voir ce que Supabase te renvoie
-        console.log("SESSION SUPABASE :", activeSession);
-        console.log("ERREUR SUPABASE :", error);
-
         if (error) {
           console.error("Erreur Supabase :", error.message);
         }
