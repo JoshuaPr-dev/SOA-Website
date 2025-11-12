@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { supabase } from "@/utils/supabaseClient";
 import { useRouter } from "next/navigation";
+import { useSupabase } from "@/components/supabase-provider";
 
 import Header from "../../../../components/Header/index";
 import Footer from "../../../../components/Footer/index";
@@ -11,7 +11,9 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
   const router = useRouter();
+  const supabase = useSupabase(); 
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,7 +46,6 @@ export default function AdminLogin() {
         return;
       }
 
-      // ✅ Rediriger uniquement si la session est bien active
       if (data?.session) {
         router.replace("/admin/temoignages");
       } else {
