@@ -7,7 +7,7 @@ export async function POST(req) {
     const { firstName, lastName, email, message } = await req.json();
 
     await resend.emails.send({
-      from: "SOA Site Web <onboarding@resend.dev>", 
+      from: "SOA Site Web <contact@strengthoptimizationacademy.com>",
       to: "dorianprevostcoaching@gmail.com",
       subject: `📩 Nouveau message de ${firstName} ${lastName}`,
       text: `
