@@ -7,9 +7,9 @@ import AdminLogout from "../../../components/AdminLogout";
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { supabase, session } = useSupabase(); 
+  const { supabase, session } = useSupabase();
   const [checking, setChecking] = useState(true);
-  
+
   useEffect(() => {
     if (pathname === "/admin/login") {
       setChecking(false);
@@ -27,8 +27,13 @@ export default function AdminLayout({ children }) {
           console.error("Erreur Supabase :", error.message);
         }
 
-        if (!activeSession) {
+        if (!activeSession && !session) {
+          console.log(
+            "❌ Aucune session active, redirection vers /admin/login"
+          );
           router.replace("/admin/login");
+        } else {
+          console.log("✅ Session détectée :", activeSession || session);
         }
       } catch (err) {
         console.error("Erreur lors de la vérification de session :", err);
@@ -39,7 +44,7 @@ export default function AdminLayout({ children }) {
     };
 
     checkAuth();
-  }, [pathname, router, supabase]);
+  }, [pathname, router, supabase, session]);
 
   if (checking)
     return <div className="loadingAdmin">Chargement en cours...</div>;
@@ -54,5 +59,3 @@ export default function AdminLayout({ children }) {
     </div>
   );
 }
-
-

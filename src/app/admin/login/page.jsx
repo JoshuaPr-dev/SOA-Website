@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "../../../context/supabase-provider";
 
-import Header from "../../../../components/Header/index";
-import Footer from "../../../../components/Footer/index";
+import Header from "../../../../components/Header";
+import Footer from "../../../../components/Footer";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -47,7 +47,11 @@ export default function AdminLogin() {
       }
 
       if (data?.session) {
-        router.replace("/admin/temoignages");
+        console.log("✅ Connexion réussie, redirection en cours...");
+        // Attendre un peu pour laisser Supabase enregistrer la session
+        setTimeout(() => {
+          router.replace("/admin/temoignages");
+        }, 800);
       } else {
         setError("La session n’a pas pu être créée. Réessaie.");
       }

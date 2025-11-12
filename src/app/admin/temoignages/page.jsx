@@ -1,13 +1,15 @@
 "use client";
-import { supabase } from "@/utils/supabaseClient";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSupabase } from "../../../context/supabase-provider";
 
-import Header from "../../../../components/Header/index";
-import Footer from "../../../../components/Footer/index";
+import Header from "../../../../components/Header";
+import Footer from "../../../../components/Footer";
 
 export default function AdminTemoignages() {
   const router = useRouter();
+  const { supabase, session } = useSupabase();
+
   const [temoignages, setTemoignages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTemoignage, setNewTemoignage] = useState({
@@ -18,25 +20,23 @@ export default function AdminTemoignages() {
   const [editing, setEditing] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
+  // ✅ Vérifie la session et charge les témoignages
   useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        router.replace("/admin/login");
-        return;
-      }
-      fetchTemoignages();
-    };
-    checkAuth();
-  }, [router]);
+    if (!session) {
+      console.log("❌ Aucune session, redirection vers /admin/login");
+      router.replace("/admin/login");
+      return;
+    }
+
+    fetchTemoignages();
+  }, [session, router]);
 
   const fetchTemoignages = async () => {
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
       .order("created_at", { ascending: false });
+
     if (!error) setTemoignages(data);
     setLoading(false);
   };
@@ -48,27 +48,19 @@ export default function AdminTemoignages() {
         .toString(36)
         .substr(2, 9)}.${fileExt}`;
 
-      console.log("Téléchargement du fichier:", fileName);
-
       const { data, error: uploadError } = await supabase.storage
         .from("testimonials-photos")
         .upload(fileName, file);
 
-      if (uploadError) {
-        console.error("Erreur de téléchargement:", uploadError);
-        throw uploadError;
-      }
-
-      console.log("Téléchargement réussi:", data);
+      if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage
         .from("testimonials-photos")
         .getPublicUrl(fileName);
 
-      console.log("URL publique:", urlData.publicUrl);
       return urlData.publicUrl;
     } catch (error) {
-      console.error("Erreur dans uploadPhoto:", error);
+      console.error("Erreur uploadPhoto:", error);
       throw error;
     }
   };
@@ -76,6 +68,7 @@ export default function AdminTemoignages() {
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!newTemoignage.nom || !newTemoignage.message) return;
+
     try {
       let photoUrl = null;
       if (newTemoignage.photo) {
@@ -98,10 +91,11 @@ export default function AdminTemoignages() {
         return;
       }
 
-      const added = Array.isArray(data) && data.length > 0 ? data[0] : null;
-      if (added) setTemoignages([added, ...temoignages]);
+      if (data?.length) {
+        setTemoignages([data[0], ...temoignages]);
+      }
     } catch (err) {
-      console.error("Insertion exceptionnelle", err);
+      console.error("Erreur ajout témoignage:", err);
     } finally {
       setNewTemoignage({ nom: "", message: "", photo: null });
       setPhotoPreview(null);
@@ -109,56 +103,40 @@ export default function AdminTemoignages() {
   };
 
   const handleDelete = async (id) => {
-    try {
-      const { error } = await supabase
-        .from("testimonials")
-        .delete()
-        .eq("id", id);
-      if (error) {
-        console.error("Erreur de supression", error);
-        return;
-      }
-      setTemoignages(temoignages.filter((t) => t.id !== id));
-    } catch (err) {
-      console.error("Suppression Exceptionnelle", err);
-    }
+    const { error } = await supabase.from("testimonials").delete().eq("id", id);
+    if (error) return console.error("Erreur suppression:", error);
+    setTemoignages(temoignages.filter((t) => t.id !== id));
   };
-
-  const handleEdit = (t) => setEditing(t);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    try {
-      const { data, error } = await supabase
-        .from("testimonials")
-        .update({ nom: editing.nom, message: editing.message })
-        .eq("id", editing.id)
-        .select();
+    const { data, error } = await supabase
+      .from("testimonials")
+      .update({ nom: editing.nom, message: editing.message })
+      .eq("id", editing.id)
+      .select();
 
-      if (error) {
-        console.error("Erreur de la mise a jour", error);
-        return;
-      }
+    if (error) {
+      console.error("Erreur mise à jour:", error);
+      return;
+    }
 
-      const updated = Array.isArray(data) && data.length > 0 ? data[0] : null;
-      if (updated) {
-        setTemoignages(
-          temoignages.map((t) =>
-            t.id === editing.id ? { ...t, ...updated } : t
-          )
-        );
-        setEditing(null);
-      }
-    } catch (err) {
-      console.error("Mise a jour exceptionnelle", err);
+    if (data?.length) {
+      setTemoignages(
+        temoignages.map((t) => (t.id === editing.id ? data[0] : t))
+      );
+      setEditing(null);
     }
   };
+
+  if (!session) return null;
 
   return (
     <div className="divAdminTemoignages">
       <Header />
       <div className="barre"></div>
       <h2 className="h2 h2AdminTemoignages">DASHBOARD TÉMOIGNAGES</h2>
+
       <form
         onSubmit={editing ? handleUpdate : handleAdd}
         className="formAdminTemoignages"
@@ -189,10 +167,10 @@ export default function AdminTemoignages() {
                   })
             }
             rows={7}
-            wrap="soft"
             className="inputAdminTemoignagesMessage"
           />
         </div>
+
         {!editing && (
           <div>
             <input
@@ -216,11 +194,14 @@ export default function AdminTemoignages() {
             )}
           </div>
         )}
+
         <button type="submit" className="buttonAdminTemoignages buttonHover">
           {editing ? "MODIFIER" : "AJOUTER"}
         </button>
+
         {editing && (
           <button
+            type="button"
             onClick={() => setEditing(null)}
             className="buttonAdminTemoignages buttonHover"
           >
@@ -228,6 +209,7 @@ export default function AdminTemoignages() {
           </button>
         )}
       </form>
+
       {loading ? (
         <p className="p">CHARGEMENT...</p>
       ) : (
@@ -235,11 +217,10 @@ export default function AdminTemoignages() {
           {temoignages.map((t) => (
             <li key={t.id} className="paddingAdminTemoignages">
               <div className="barre"></div>
-              <div></div>
               <h3 className="h3">{t.nom} :</h3>
               <p className="p pAdminTemoignagesMessage">{t.message}</p>
               <button
-                onClick={() => handleEdit(t)}
+                onClick={() => setEditing(t)}
                 className="buttonAdminTemoignages buttonHover"
               >
                 MODIFIER
