@@ -18,7 +18,7 @@ export default function Contact() {
     if (!isSubmitted) return;
     const timer = setTimeout(() => {
       router.push("/");
-    }, 5000); 
+    }, 5000);
     return () => clearTimeout(timer);
   }, [isSubmitted, router]);
 
@@ -75,13 +75,14 @@ export default function Contact() {
     <div className="pageContact">
       <form onSubmit={handleSubmit}>
         <h2 className="h2 h2Contact paddingContact">CONTACT</h2>
-        <h3 className="h3 paddingContact">Demandes de coaching</h3>
+        <h3 className="h3 paddingContact">Contact & Questions</h3>
         <p className="p paddingContact">
-          Si tu es intéressé pour travailler avec moi, n’hésite pas à remplir le
-          formulaire de contact
+          Si tu es intéressé(e) pour travailler avec moi ou si tu as une
+          question sur l'accompagnement, dis-moi tout de ton projet en
+          remplissant le formulaire ci-dessous.
         </p>
         <p className="p p2Contact ">
-          Veuillez remplir le formulaire ci-dessous
+          Je te recontacterai personnellement pour discuter de tes objectifs !
         </p>
 
         <div className="flexForm">

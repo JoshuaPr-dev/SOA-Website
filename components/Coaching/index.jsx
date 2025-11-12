@@ -67,7 +67,7 @@ export default function Coaching() {
             </span>{" "}
             afin de{" "}
             <span className="spanFooter">
-              ous accompagner tout au long de la journée
+              vous accompagner tout au long de la journée
             </span>
             . Mon objectif est de{" "}
             <span className="spanFooter">

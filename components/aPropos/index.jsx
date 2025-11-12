@@ -26,7 +26,7 @@ export default function About() {
           <p className="p pAbout fontP">
             Mon approche repose sur un <span className="spanFooter">accompagnement personnalisé</span> et une <span className="spanFooter">vision
             complète de l’entraînement</span>. <span className="spoanFooter">Rien n'est laissé au hasard</span> pour
-            permettre à chaque athlète de <span className="spanFooter">progresser efficacement</span> et de
+            permettre à chaque athlète de <span className="spanFooter">progresser efficacement</span> et de{" "}
             <span className="spanFooter">développer pleinement son potentiel</span>.
           </p>
         </div>
