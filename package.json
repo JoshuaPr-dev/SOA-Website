@@ -1,0 +1,30 @@
+{
+  "name": "mon-projet-next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@emailjs/browser": "^4.4.1",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.78.0",
+    "dompurify": "^3.3.0",
+    "next": "16.0.0",
+    "nodemailer": "^7.0.10",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "resend": "^6.2.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.0",
+    "tailwindcss": "^4"
+  }
+}
