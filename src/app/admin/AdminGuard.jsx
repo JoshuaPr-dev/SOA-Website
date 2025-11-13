@@ -8,41 +8,48 @@ import { useSupabase } from "../../context/supabase-provider";
 export default function AdminGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { supabase, session } = useSupabase();
-  const [checking, setChecking] = useState(true);
+  const { supabase } = useSupabase();
+
+  const [loading, setLoading] = useState(true);
+  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
     if (pathname === "/admin/login") {
-      setChecking(false);
+      setLoading(false);
       return;
     }
 
-    const verifySession = async () => {
+    const checkAuth = async () => {
+      console.log("🔍 Vérification de la session...");
       try {
-        console.log("🔍 Vérification de la session admin...");
         const { data } = await supabase.auth.getSession();
-        console.log("📦 Session trouvée:", data.session);
+        console.log("📦 Session trouvée:", data?.session);
 
-        if (!data?.session) {
+        if (data?.session) {
+          console.log("✅ Session valide, accès autorisé");
+          setIsAuth(true);
+        } else {
           console.warn("❌ Pas de session, redirection vers /admin/login");
           router.replace("/admin/login");
-        } else {
-          console.log("✅ Accès autorisé à la page admin");
         }
       } catch (err) {
-        console.error("⚠️ Erreur vérification session :", err);
+        console.error("⚠️ Erreur lors de la vérification de la session:", err);
         router.replace("/admin/login");
       } finally {
-        setChecking(false);
+        setLoading(false);
       }
     };
 
-    const timeout = setTimeout(verifySession, 400);
-    return () => clearTimeout(timeout);
+    const timer = setTimeout(checkAuth, 800);
+    return () => clearTimeout(timer);
   }, [pathname, supabase, router]);
 
-  if (checking) {
-    return <div className="loadingAdmin">Chargement en cours...</div>;
+  if (loading) {
+    return <div className="loadingAdmin">Chargement de la session...</div>;
+  }
+
+  if (!isAuth && pathname !== "/admin/login") {
+    return <div>Redirection...</div>;
   }
 
   return children;
