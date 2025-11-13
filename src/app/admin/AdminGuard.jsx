@@ -8,36 +8,49 @@ import { useSupabase } from "../../context/supabase-provider";
 export default function AdminGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { supabase, session } = useSupabase();
+  const { supabase } = useSupabase();
 
-  const [checking, setChecking] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (pathname === "/admin/login") {
-        setChecking(false);
-        return;
-      }
+      console.log("🔍 Vérification de la session...");
 
-      if (session === undefined) {
-        console.log("⏳ En attente de l’hydratation Supabase...");
-        return;
-      }
+      try {
+        const { data } = await supabase.auth.getSession();
+        console.log("📦 Session trouvée :", data?.session);
 
-      if (!session) {
-        console.warn("❌ Aucune session active, redirection...");
+        if (data?.session) {
+          console.log("✅ Session valide, accès autorisé");
+          setSession(data.session);
+        } else {
+          console.warn("❌ Pas de session — redirection vers /admin/login");
+          if (pathname !== "/admin/login") {
+            router.replace("/admin/login");
+          }
+        }
+      } catch (err) {
+        console.error("⚠️ Erreur lors de la vérification de la session :", err);
         router.replace("/admin/login");
-      } else {
-        console.log("✅ Session active, accès autorisé à", pathname);
+      } finally {
+        setLoading(false);
       }
-
-      setChecking(false);
     };
 
     checkAuth();
-  }, [pathname, session, router]);
 
-  if (checking || session === undefined) {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      console.log("🔄 Changement de session détecté :", newSession);
+      setSession(newSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [pathname, supabase, router]);
+
+  if (loading) {
     return <div className="loadingAdmin">Chargement de la session...</div>;
   }
 
