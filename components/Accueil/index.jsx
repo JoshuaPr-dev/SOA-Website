@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/utils/supabaseClient";
+import { useSupabase } from "@/context/supabase-provider";
 
 export default function Accueil() {
+  const { supabase } = useSupabase();
+
   const [temoignages, setTemoignages] = useState([]);
   const [loadingTemoignages, setLoadingTemoignages] = useState(true);
   const [indexSlide, setIndexSlide] = useState(0);
@@ -103,7 +105,12 @@ export default function Accueil() {
         <h1 className="h2 titrePrincipal">STRENGTH OPTIMIZATION ACADEMY</h1>
 
         <div className="blocEnSavoirPlus">
-          <img className="coach" src="/coach.png" alt="Photo du coach" loading="lazy"/>
+          <img
+            className="coach"
+            src="/coach.png"
+            alt="Photo du coach"
+            loading="lazy"
+          />
           <div className="blocEnSavoirPlusRelative">
             <h2 className="h2 h2_1">QUI SUIS-JE ?</h2>
             <p className="p p1Accueil">
@@ -295,7 +302,12 @@ export default function Accueil() {
         </section>
       </div>
       <div className="bottomImgWrapper">
-        <img src="/bottomPage.jpeg" alt="Coach de dos" className="bottomImg" loading="lazy" />
+        <img
+          src="/bottomPage.jpeg"
+          alt="Coach de dos"
+          className="bottomImg"
+          loading="lazy"
+        />
       </div>
     </div>
   );

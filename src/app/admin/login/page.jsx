@@ -14,7 +14,6 @@ export default function AdminLogin() {
   const router = useRouter();
   const { supabase } = useSupabase();
 
-  // 🔁 Si déjà connecté → redirige automatiquement
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -53,6 +52,7 @@ export default function AdminLogin() {
       }
 
       if (data?.session) {
+        await supabase.auth.getSession(); 
         console.log("✅ Session créée avec succès :", data.session);
         router.push("/admin/temoignages");
       } else {

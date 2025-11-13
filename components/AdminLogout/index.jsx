@@ -1,17 +1,18 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSupabase } from "@/context/supabase-provider";
 
 export default function AdminLogout() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { supabase } = useSupabase();
 
   const handleLogout = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/logout", { method: "GET" });
-      if (!res.ok) throw new Error("Erreur de déconnexion serveur");
-      router.push("/");
+      await supabase.auth.signOut();
+      router.push("/admin/login");
     } catch (err) {
       console.error("Erreur de déconnexion :", err);
     } finally {

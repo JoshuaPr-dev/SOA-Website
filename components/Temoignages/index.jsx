@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabaseClient";
+import { useSupabase } from "@/context/supabase-provider";
+
 
 export default function Temoignages() {
+const { supabase } = useSupabase();
+
   const [temoignages, setTemoignages] = useState([]);
   const [loading, setLoading] = useState(true);
 
