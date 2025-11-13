@@ -2,14 +2,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "../../../context/supabase-provider";
-
 import Header from "../../../../components/Header";
 import Footer from "../../../../components/Footer";
 
 export default function AdminTemoignages() {
   const router = useRouter();
-  const { supabase, session } = useSupabase();
+  const { supabase } = useSupabase();
 
+  const [session, setSession] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [temoignages, setTemoignages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTemoignage, setNewTemoignage] = useState({
@@ -19,22 +20,30 @@ export default function AdminTemoignages() {
   });
   const [editing, setEditing] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [checkingSession, setCheckingSession] = useState(true); 
 
+  // ✅ Vérifie la session utilisateur au montage
   useEffect(() => {
     const checkSession = async () => {
-      if (session === undefined) return; 
-
-      if (!session) {
+      try {
+        console.log("🔐 Vérification de la session Supabase...");
+        const { data } = await supabase.auth.getSession();
+        if (data?.session) {
+          console.log("✅ Session trouvée :", data.session.user.email);
+          setSession(data.session);
+          await fetchTemoignages();
+        } else {
+          console.warn("⚠️ Aucune session trouvée → redirection login");
+          router.replace("/admin/login");
+        }
+      } catch (err) {
+        console.error("❌ Erreur de vérification de session :", err);
         router.replace("/admin/login");
-      } else {
-        await fetchTemoignages();
+      } finally {
+        setCheckingSession(false);
       }
-      setCheckingSession(false);
     };
-
     checkSession();
-  }, [session, router]);
+  }, [supabase, router]);
 
   const fetchTemoignages = async () => {
     setLoading(true);
@@ -43,7 +52,11 @@ export default function AdminTemoignages() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error) setTemoignages(data);
+    if (error) {
+      console.error("❌ Erreur chargement témoignages :", error);
+    } else {
+      setTemoignages(data);
+    }
     setLoading(false);
   };
 
@@ -76,7 +89,7 @@ export default function AdminTemoignages() {
         photoUrl = await uploadPhoto(newTemoignage.photo);
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("testimonials")
         .insert([
           {
@@ -87,7 +100,10 @@ export default function AdminTemoignages() {
         ])
         .select();
 
+      if (error) throw error;
       if (data?.length) setTemoignages([data[0], ...temoignages]);
+    } catch (err) {
+      console.error("❌ Erreur ajout témoignage :", err.message);
     } finally {
       setNewTemoignage({ nom: "", message: "", photo: null });
       setPhotoPreview(null);
@@ -101,13 +117,13 @@ export default function AdminTemoignages() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("testimonials")
       .update({ nom: editing.nom, message: editing.message })
       .eq("id", editing.id)
       .select();
 
-    if (data?.length) {
+    if (!error && data?.length) {
       setTemoignages(
         temoignages.map((t) => (t.id === editing.id ? data[0] : t))
       );

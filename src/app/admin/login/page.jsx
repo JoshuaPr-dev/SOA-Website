@@ -1,10 +1,7 @@
 "use client";
-export const dynamic = "force-dynamic"; // 👈 empêche le prerendering qui casse sur Vercel
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "../../../context/supabase-provider";
-
 import Header from "../../../../components/Header";
 import Footer from "../../../../components/Footer";
 
@@ -16,6 +13,18 @@ export default function AdminLogin() {
 
   const router = useRouter();
   const { supabase } = useSupabase();
+
+  // ✅ Rediriger automatiquement si déjà connecté
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
+        console.log("🔁 Déjà connecté, redirection vers /admin/temoignages");
+        router.replace("/admin/temoignages");
+      }
+    };
+    checkSession();
+  }, [supabase, router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -49,9 +58,10 @@ export default function AdminLogin() {
 
       if (data?.session) {
         console.log("✅ Session créée avec succès :", data.session);
+        // 🚀 Redirection forcée côté client après création de la session
         setTimeout(() => {
-          router.replace("/admin/temoignages");
-        }, 600);
+          router.push("/admin/temoignages");
+        }, 400);
       } else {
         console.warn("⚠️ Aucune session retournée par Supabase !");
         setError("La session n’a pas pu être créée. Réessaie.");
