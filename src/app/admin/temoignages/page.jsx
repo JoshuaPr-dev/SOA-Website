@@ -26,7 +26,7 @@ export default function AdminTemoignages() {
     const checkSession = async () => {
       try {
         console.log("🔐 Vérification de la session Supabase...");
-        const { data } = await supabase.auth.getSession();
+        // const { data } = await supabase.auth.getSession()
         if (data?.session) {
           console.log("✅ Session trouvée :", data.session.user.email);
           setSession(data.session);
