@@ -1,26 +1,40 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/utils/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 
 const SupabaseContext = createContext();
 
 export const SupabaseProvider = ({ children }) => {
-  const [session, setSession] = useState(undefined); 
+  const [supabase] = useState(() =>
+    createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+  );
+  const [session, setSession] = useState();
 
   useEffect(() => {
-    const fetchSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data?.session || null);
-    };
-
-    fetchSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => setSession(session)
+    console.log("🔍 Vérif Supabase client:");
+    console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+    console.log(
+      "Key:",
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        ? "✅ Clé détectée"
+        : "❌ Clé absente"
     );
 
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   return (
     <SupabaseContext.Provider value={{ supabase, session }}>
@@ -29,9 +43,4 @@ export const SupabaseProvider = ({ children }) => {
   );
 };
 
-export const useSupabase = () => {
-  const context = useContext(SupabaseContext);
-  if (!context)
-    throw new Error("useSupabase doit être utilisé dans un <SupabaseProvider>");
-  return context;
-};
+export const useSupabase = () => useContext(SupabaseContext);

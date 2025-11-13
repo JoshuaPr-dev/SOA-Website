@@ -14,7 +14,7 @@ export default function AdminLogin() {
   const router = useRouter();
   const { supabase } = useSupabase();
 
-  // ✅ Rediriger automatiquement si déjà connecté
+  // 🔁 Si déjà connecté → redirige automatiquement
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -34,7 +34,6 @@ export default function AdminLogin() {
     try {
       if (!email || !password) {
         setError("Merci de renseigner l'email et le mot de passe.");
-        setLoading(false);
         return;
       }
 
@@ -48,23 +47,16 @@ export default function AdminLogin() {
       if (error) {
         console.error("❌ Erreur Supabase:", error.message);
         setError(
-          error.message?.toLowerCase().includes("invalid")
-            ? "Identifiants invalides — vérifie l'email et le mot de passe."
-            : error.message || "Erreur lors de la connexion."
+          "Identifiants invalides — vérifie l'email et le mot de passe."
         );
-        setLoading(false);
         return;
       }
 
       if (data?.session) {
         console.log("✅ Session créée avec succès :", data.session);
-        // 🚀 Redirection forcée côté client après création de la session
-        setTimeout(() => {
-          router.push("/admin/temoignages");
-        }, 400);
+        router.push("/admin/temoignages");
       } else {
-        console.warn("⚠️ Aucune session retournée par Supabase !");
-        setError("La session n’a pas pu être créée. Réessaie.");
+        setError("⚠️ La session n’a pas pu être créée. Réessaie.");
       }
     } catch (err) {
       console.error("⚠️ Erreur inattendue :", err);
@@ -114,7 +106,6 @@ export default function AdminLogin() {
           {error}
         </p>
       )}
-
       <div className="barre"></div>
       <Footer />
     </div>
