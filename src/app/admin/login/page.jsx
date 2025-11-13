@@ -1,113 +1,55 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "../../../context/supabase-provider";
-import Header from "../../../../components/Header";
-import Footer from "../../../../components/Footer";
+import { useSupabase } from "@/context/supabase-provider";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const router = useRouter();
-  const { supabase } = useSupabase();
+  const { supabase, session } = useSupabase();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data?.session) {
-        console.log("🔁 Déjà connecté, redirection vers /admin/temoignages");
-        router.replace("/admin/temoignages");
-      }
-    };
-    checkSession();
-  }, [supabase, router]);
+    if (session) {
+      console.log("🔁 Déjà connecté, redirection vers /admin/temoignages");
+      setTimeout(() => router.replace("/admin/temoignages"), 0);
+    }
+  }, [session, router]);
+
+  if (session) {
+    return <p>Redirection vers le tableau de bord...</p>;
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    const email = e.target.email.value;
+    const password = e.target.password.value;
 
-    try {
-      if (!email || !password) {
-        setError("Merci de renseigner l'email et le mot de passe.");
-        return;
-      }
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      console.log("🔐 Tentative de connexion...");
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      console.log("📡 Réponse Supabase:", { data, error });
-
-      if (error) {
-        console.error("❌ Erreur Supabase:", error.message);
-        setError(
-          "Identifiants invalides — vérifie l'email et le mot de passe."
-        );
-        return;
-      }
-
-      if (data?.session) {
-        await supabase.auth.getSession(); 
-        console.log("✅ Session créée avec succès :", data.session);
-        router.push("/admin/temoignages");
-      } else {
-        setError("⚠️ La session n’a pas pu être créée. Réessaie.");
-      }
-    } catch (err) {
-      console.error("⚠️ Erreur inattendue :", err);
-      setError("Erreur réseau ou inconnue.");
-    } finally {
-      setLoading(false);
+    if (error) {
+      alert("Erreur de connexion : " + error.message);
+    } else {
+      console.log("✅ Connexion réussie !");
+      router.replace("/admin/temoignages");
     }
   };
 
   return (
-    <div className="divAdminLogin">
-      <Header />
-      <div className="barre"></div>
-      <h2 className="h2 h2AdminLogin">CONNEXION ADMIN</h2>
-
-      <form onSubmit={handleLogin} className="formAdminLogin">
+    <div className="login-page">
+      <h1>Connexion Admin</h1>
+      <form onSubmit={handleLogin}>
+        <input type="email" name="email" placeholder="Email" required />
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="inputAdminLoginEmail"
-          disabled={loading}
+          type="password"
+          name="password"
+          placeholder="Mot de passe"
+          required
         />
-
-        <div className="divAdminLoginFlex">
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="inputAdminLoginMdp"
-            disabled={loading}
-          />
-          <button
-            type="submit"
-            className="buttonAdminLogin buttonHover"
-            disabled={loading}
-          >
-            {loading ? "Connexion..." : "SE CONNECTER"}
-          </button>
-        </div>
+        <button type="submit">Se connecter</button>
       </form>
-
-      {error && (
-        <p className="p" style={{ color: "red" }}>
-          {error}
-        </p>
-      )}
-      <div className="barre"></div>
-      <Footer />
     </div>
   );
 }
