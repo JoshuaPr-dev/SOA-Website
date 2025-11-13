@@ -1,105 +1,46 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSupabase } from "../../../context/supabase-provider";
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-import Header from "../../../../components/Header";
-import Footer from "../../../../components/Footer";
-
-export default function AdminLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const router = useRouter();
-  const { supabase } = useSupabase();
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      if (!email || !password) {
-        setError("Merci de renseigner l'email et le mot de passe.");
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setError(
-          error.message?.toLowerCase().includes("invalid")
-            ? "Identifiants invalides — vérifie l'email et le mot de passe."
-            : error.message || "Erreur lors de la connexion."
-        );
-        setLoading(false);
-        return;
-      }
-
-      if (data?.session) {
-        setTimeout(() => {
-          router.replace("/admin/temoignages");
-        }, 600);
-      } else {
-        setError("La session n’a pas pu être créée. Réessaie.");
-      }
-    } catch {
-      setError("Erreur réseau ou inconnue.");
-    } finally {
+  try {
+    if (!email || !password) {
+      setError("Merci de renseigner l'email et le mot de passe.");
       setLoading(false);
+      return;
     }
-  };
 
-  return (
-    <div className="divAdminLogin">
-      <Header />
-      <div className="barre"></div>
-      <h2 className="h2 h2AdminLogin">CONNEXION ADMIN</h2>
+    console.log("🔐 Tentative de connexion...");
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    console.log("📡 Réponse Supabase:", { data, error });
 
-      <form onSubmit={handleLogin} className="formAdminLogin">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="inputAdminLoginEmail"
-          disabled={loading}
-        />
+    if (error) {
+      console.error("❌ Erreur Supabase:", error.message);
+      setError(
+        error.message?.toLowerCase().includes("invalid")
+          ? "Identifiants invalides — vérifie l'email et le mot de passe."
+          : error.message || "Erreur lors de la connexion."
+      );
+      setLoading(false);
+      return;
+    }
 
-        <div className="divAdminLoginFlex">
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="inputAdminLoginMdp"
-            disabled={loading}
-          />
-          <button
-            type="submit"
-            className="buttonAdminLogin buttonHover"
-            disabled={loading}
-          >
-            {loading ? "Connexion..." : "SE CONNECTER"}
-          </button>
-        </div>
-      </form>
-
-      {error && (
-        <p className="p" style={{ color: "red" }}>
-          {error}
-        </p>
-      )}
-
-      <div className="barre"></div>
-      <Footer />
-    </div>
-  );
-}
- 
+    if (data?.session) {
+      console.log("✅ Session créée avec succès :", data.session);
+      setTimeout(() => {
+        router.replace("/admin/temoignages");
+      }, 600);
+    } else {
+      console.warn("⚠️ Aucune session retournée par Supabase !");
+      setError("La session n’a pas pu être créée. Réessaie.");
+    }
+  } catch (err) {
+    console.error("⚠️ Erreur inattendue :", err);
+    setError("Erreur réseau ou inconnue.");
+  } finally {
+    setLoading(false);
+  }
+};
