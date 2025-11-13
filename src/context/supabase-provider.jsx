@@ -1,23 +1,16 @@
 "use client";
+
 import { createContext, useContext, useState, useEffect } from "react";
-import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"; 
+import { createBrowserClient } from "@supabase/ssr";
 
 const SupabaseContext = createContext();
 
 export const SupabaseProvider = ({ children }) => {
   const [supabase] = useState(() =>
-    createBrowserSupabaseClient({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      options: {
-        auth: {
-          persistSession: true, 
-          autoRefreshToken: true, 
-          detectSessionInUrl: true, 
-          storageKey: "strength-supabase-auth", 
-        },
-      },
-    })
+    createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
   );
 
   const [session, setSession] = useState(undefined);
@@ -27,23 +20,23 @@ export const SupabaseProvider = ({ children }) => {
 
     const init = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) console.error("Erreur getSession:", error);
         if (mounted) setSession(data?.session ?? null);
 
-        const { data: listener } = supabase.auth.onAuthStateChange(
-          (_event, sess) => {
-            if (mounted) setSession(sess);
-          }
-        );
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, newSession) => {
+          if (mounted) setSession(newSession);
+        });
 
-        return () => listener.subscription.unsubscribe();
+        return () => subscription.unsubscribe();
       } catch (err) {
         console.error("⚠️ Erreur d’initialisation Supabase:", err);
       }
     };
 
     init();
-
     return () => {
       mounted = false;
     };
