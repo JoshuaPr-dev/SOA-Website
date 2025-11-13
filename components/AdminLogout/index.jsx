@@ -9,14 +9,11 @@ export default function AdminLogout() {
   const { supabase } = useSupabase();
 
   const handleLogout = async () => {
-    setLoading(true);
     try {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "local" });
       router.push("/admin/login");
-    } catch (err) {
-      console.error("Erreur de déconnexion :", err);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Erreur de déconnexion :", error);
     }
   };
 

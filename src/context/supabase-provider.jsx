@@ -1,12 +1,12 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 const SupabaseContext = createContext();
 
 export const SupabaseProvider = ({ children }) => {
   const [supabase] = useState(() =>
-    createClient(
+    createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       {
@@ -23,21 +23,20 @@ export const SupabaseProvider = ({ children }) => {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    const getSession = async () => {
+    const init = async () => {
       const { data } = await supabase.auth.getSession();
       setSession(data?.session ?? null);
-    };
-    getSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, sess) => {
-        setSession(sess);
-      }
-    );
+      const { data: listener } = supabase.auth.onAuthStateChange(
+        (_event, sess) => setSession(sess)
+      );
 
-    return () => {
-      listener.subscription.unsubscribe();
+      return () => {
+        listener.subscription.unsubscribe();
+      };
     };
+
+    init();
   }, [supabase]);
 
   return (
