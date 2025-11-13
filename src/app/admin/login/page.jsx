@@ -52,7 +52,6 @@ export default function AdminLogin() {
 
       if (data?.session) {
         console.log("✅ Connexion réussie :", data.session);
-        // ✅ Redirection fluide vers la page admin
         setTimeout(() => router.replace("/admin/temoignages"), 200);
       } else {
         setError("⚠️ La session n’a pas pu être créée. Réessaie.");
@@ -65,7 +64,6 @@ export default function AdminLogin() {
     }
   };
 
-  // 🔒 Empêche d'afficher le formulaire si déjà connecté
   if (session) {
     return (
       <div className="divAdminLogin">

@@ -14,30 +14,44 @@ export const SupabaseProvider = ({ children }) => {
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: true,
-          storageKey: "strength-supabase-auth",
-          storage: typeof window !== "undefined" ? window.localStorage : undefined, 
+          storage: typeof window !== "undefined" ? window.localStorage : undefined,
         },
       }
     )
   );
 
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(undefined);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data?.session ?? null);
-    };
-    getSession();
+    let mounted = true;
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-    });
+    const init = async () => {
+      try {
+        await new Promise((r) => setTimeout(r, 400));
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+        setSession(data?.session ?? null);
+
+        const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
+          if (mounted) setSession(sess);
+        });
+
+        return () => listener.subscription.unsubscribe();
+      } catch (err) {
+        console.error("⚠️ Erreur d’initialisation Supabase:", err);
+      }
+    };
+
+    init();
 
     return () => {
-      listener.subscription.unsubscribe();
+      mounted = false;
     };
   }, [supabase]);
+
+  if (session === undefined) {
+    return <div className="loadingAdmin">Chargement de la session...</div>;
+  }
 
   return (
     <SupabaseContext.Provider value={{ supabase, session }}>
