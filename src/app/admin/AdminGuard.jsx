@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSupabase } from "../../context/supabase-provider";
@@ -6,70 +8,48 @@ import { useSupabase } from "../../context/supabase-provider";
 export default function AdminGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { supabase, session: contextSession } = useSupabase();
+  const { supabase, session } = useSupabase();
 
-  const [session, setSession] = useState(contextSession);
-  const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const loadSession = async () => {
+    const verifySession = async () => {
       console.log("🔍 Vérification de la session...");
 
-      if (contextSession) {
-        console.log("✅ Session détectée via le contexte");
-        setSession(contextSession);
-        setLoading(false);
+      if (session) {
+        console.log("✅ Session détectée via le contexte :", session);
+        setChecking(false);
         return;
       }
 
-
       const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error(
-          "⚠️ Erreur lors de la récupération de la session :",
-          error
-        );
-      }
-
       if (data?.session) {
-        console.log("✅ Session valide :", data.session);
-        setSession(data.session);
+        console.log("✅ Session valide détectée via getSession()");
+        setChecking(false);
       } else {
-        console.warn("❌ Aucune session — redirection vers /admin/login");
-        if (pathname !== "/admin/login") {
-          router.replace("/admin/login");
-        }
+        console.warn(
+          "❌ Aucune session trouvée, redirection vers /admin/login"
+        );
+        router.replace("/admin/login");
       }
-
-      setLoading(false);
     };
 
-    loadSession();
+    verifySession();
 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      console.log("🔄 Changement de session détecté :", newSession);
+      if (newSession) setChecking(false);
+      else if (pathname !== "/admin/login") router.replace("/admin/login");
+    });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        console.log("🔄 Changement de session détecté :", newSession);
-        setSession(newSession);
-        if (newSession && pathname === "/admin/login") {
-          router.replace("/admin/temoignages");
-        }
-        if (!newSession && pathname !== "/admin/login") {
-          router.replace("/admin/login");
-        }
-      }
-    );
+    return () => subscription.unsubscribe();
+  }, [supabase, session, router, pathname]);
 
-    return () => listener.subscription.unsubscribe();
-  }, [contextSession, pathname, supabase, router]);
-
-
-  if (loading) {
-    return <div className="loadingAdmin">Chargement de la session...</div>;
+  if (checking) {
+    return <div className="loadingAdmin">Vérification de la session...</div>;
   }
 
-  if (!session && pathname !== "/admin/login") {
-    return <div>Redirection...</div>;
-  }
   return children;
 }
