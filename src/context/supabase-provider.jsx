@@ -1,5 +1,4 @@
 "use client";
-
 import { createContext, useContext, useState, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
