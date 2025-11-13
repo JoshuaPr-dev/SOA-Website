@@ -1,56 +1,41 @@
 "use client";
-export const dynamic = "force-dynamic"; 
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSupabase } from "../../context/supabase-provider";
+import { useSupabase } from "@/context/supabase-provider";
 
 export default function AdminGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { supabase } = useSupabase();
-
-  const [loading, setLoading] = useState(true);
-  const [isAuth, setIsAuth] = useState(false);
+  const { session } = useSupabase(); // ✅ on utilise directement la session du Provider
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     if (pathname === "/admin/login") {
-      setLoading(false);
+      setChecking(false);
       return;
     }
 
-    const checkAuth = async () => {
-      console.log("🔍 Vérification de la session...");
-      try {
-        const { data } = await supabase.auth.getSession();
-        console.log("📦 Session trouvée:", data?.session);
+    // ✅ on attend que la session soit initialisée par le provider
+    if (session === undefined) return; // encore en train de charger
+    if (session === null) {
+      console.warn("❌ Pas de session, redirection vers /admin/login");
+      router.replace("/admin/login");
+    } else {
+      console.log("✅ Session valide, accès autorisé :", session.user?.email);
+    }
 
-        if (data?.session) {
-          console.log("✅ Session valide, accès autorisé");
-          setIsAuth(true);
-        } else {
-          console.warn("❌ Pas de session, redirection vers /admin/login");
-          router.replace("/admin/login");
-        }
-      } catch (err) {
-        console.error("⚠️ Erreur lors de la vérification de la session:", err);
-        router.replace("/admin/login");
-      } finally {
-        setLoading(false);
-      }
-    };
+    setChecking(false);
+  }, [pathname, session, router]);
 
-    const timer = setTimeout(checkAuth, 800);
-    return () => clearTimeout(timer);
-  }, [pathname, supabase, router]);
-
-  if (loading) {
-    return <div className="loadingAdmin">Chargement de la session...</div>;
+  if (checking) {
+    return <div className="loadingAdmin">Vérification de la session...</div>;
   }
 
-  if (!isAuth && pathname !== "/admin/login") {
+  if (!session && pathname !== "/admin/login") {
     return <div>Redirection...</div>;
   }
 
-  return children;
+  return <>{children}</>;
 }
