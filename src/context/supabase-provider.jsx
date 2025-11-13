@@ -5,24 +5,21 @@ import { supabase } from "@/utils/supabaseClient";
 const SupabaseContext = createContext();
 
 export const SupabaseProvider = ({ children }) => {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(undefined); 
 
   useEffect(() => {
-    const getSession = async () => {
-      await new Promise((r) => setTimeout(r, 300)); // petit délai
+    const fetchSession = async () => {
       const { data } = await supabase.auth.getSession();
-      setSession(data?.session ?? null);
+      setSession(data?.session || null);
     };
 
-    getSession();
+    fetchSession();
 
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-      }
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => setSession(session)
     );
 
-    return () => subscription?.subscription?.unsubscribe();
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   return (
@@ -34,8 +31,7 @@ export const SupabaseProvider = ({ children }) => {
 
 export const useSupabase = () => {
   const context = useContext(SupabaseContext);
-  if (!context) {
+  if (!context)
     throw new Error("useSupabase doit être utilisé dans un <SupabaseProvider>");
-  }
   return context;
 };

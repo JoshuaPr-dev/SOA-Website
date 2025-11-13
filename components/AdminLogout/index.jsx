@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/utils/supabaseClient";
 
 export default function AdminLogout() {
   const [loading, setLoading] = useState(false);
@@ -10,22 +9,23 @@ export default function AdminLogout() {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Echec de la deconnexion", error.message);
-        setLoading(false);
-        return;
-      }
+      const res = await fetch("/api/logout", { method: "GET" });
+      if (!res.ok) throw new Error("Erreur de déconnexion serveur");
       router.push("/");
     } catch (err) {
-      console.error(err);
+      console.error("Erreur de déconnexion :", err);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <button onClick={handleLogout} disabled={loading} className="buttonAdmin buttonHover">
-      {loading ? 'DÉCONNECTION...' : "SE DÉCONNECTER"}
+    <button
+      onClick={handleLogout}
+      disabled={loading}
+      className="buttonAdmin buttonHover"
+    >
+      {loading ? "DÉCONNEXION..." : "SE DÉCONNECTER"}
     </button>
   );
 }

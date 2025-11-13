@@ -1,44 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSupabase } from "../../context/supabase-provider";
+import { useSupabase } from "@/context/supabase-provider";
 
 export default function AdminGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { supabase, session } = useSupabase();
-  const [checking, setChecking] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (pathname === "/admin/login") {
-      setChecking(false);
+    if (pathname.startsWith("/admin/login")) {
+      setLoading(false);
       return;
     }
 
     const verifySession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        console.log("📦 Session récupérée :", data.session);
+      if (session === undefined) return; // encore en chargement
 
-        if (!data?.session) {
-          console.warn("❌ Aucune session, redirection vers /admin/login");
-          router.replace("/admin/login");
-        } else {
-          console.log("✅ Session valide, accès autorisé");
-        }
-      } catch (err) {
-        console.error("⚠️ Erreur vérification session :", err);
+      if (!session) {
+        console.warn("🔒 Pas de session, redirection login");
         router.replace("/admin/login");
-      } finally {
-        setChecking(false);
       }
+      setLoading(false);
     };
 
     verifySession();
-  }, [pathname, supabase, router]);
+  }, [pathname, session, router]);
 
-  if (checking) {
-    return <div className="loadingAdmin">Chargement en cours...</div>;
+  if (loading) {
+    return <div className="loadingAdmin">Chargement...</div>;
   }
 
   return children;

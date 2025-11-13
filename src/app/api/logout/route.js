@@ -4,18 +4,16 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const nextCookies = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => nextCookies });
-
+    const supabase = createRouteHandlerClient({ cookies });
     await supabase.auth.signOut();
 
-    const baseUrl =
+    const redirectTo =
       process.env.NEXT_PUBLIC_BASE_URL ||
       (process.env.NODE_ENV === "production"
         ? "https://strengthoptimizationacademy.com"
         : "http://localhost:3000");
 
-    return NextResponse.redirect(new URL("/", baseUrl));
+    return NextResponse.redirect(new URL("/", redirectTo));
   } catch (err) {
     console.error("Erreur de déconnexion :", err);
     return NextResponse.json(
