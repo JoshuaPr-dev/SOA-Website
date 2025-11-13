@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const SupabaseContext = createContext();
@@ -8,32 +8,36 @@ export const SupabaseProvider = ({ children }) => {
   const [supabase] = useState(() =>
     createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          storageKey: "strength-supabase-auth",
+        },
+      }
     )
   );
-  const [session, setSession] = useState();
+
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
-    console.log("🔍 Vérif Supabase client:");
-    console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-    console.log(
-      "Key:",
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        ? "✅ Clé détectée"
-        : "❌ Clé absente"
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data?.session ?? null);
+    };
+    getSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, sess) => {
+        setSession(sess);
+      }
     );
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, [supabase]);
 
   return (
