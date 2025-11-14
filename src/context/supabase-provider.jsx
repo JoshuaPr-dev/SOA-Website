@@ -1,49 +1,51 @@
 "use client";
+
 import { createContext, useContext, useState, useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
 const SupabaseContext = createContext();
 
 export const SupabaseProvider = ({ children }) => {
-  const [supabase] = useState(() =>
-    createBrowserClient(
+  const supabase =
+    globalThis.__supabase ||
+    createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-  );
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          storageKey: "strength-supabase-auth",
+          detectSessionInUrl: false,
+        },
+      }
+    );
 
-  const [session, setSession] = useState(undefined);
+  globalThis.__supabase = supabase;
+
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     let mounted = true;
 
-    const init = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) console.error("Erreur getSession:", error);
-        if (mounted) setSession(data?.session ?? null);
-
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, newSession) => {
-          if (mounted) setSession(newSession);
-        });
-
-        return () => subscription.unsubscribe();
-      } catch (err) {
-        console.error("⚠️ Erreur d’initialisation Supabase:", err);
-      }
+    const loadSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (mounted) setSession(data?.session ?? null);
     };
 
-    init();
+    loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, sess) => {
+      if (mounted) setSession(sess);
+    });
+
     return () => {
       mounted = false;
+      subscription.unsubscribe();
     };
   }, [supabase]);
-
-  if (session === undefined) {
-    return <div className="loadingAdmin">Chargement de la session...</div>;
-  }
 
   return (
     <SupabaseContext.Provider value={{ supabase, session }}>
