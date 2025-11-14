@@ -42,7 +42,7 @@ const { supabase } = useSupabase();
     <div className="divPageTemoignages">
       <div className="topPageWrapper">
         <img
-          src="picTemoignages.jpeg"
+          src="picTemoignages.jpg"
           alt="Coach avec 4 athlètes"
           className="imgTopTemoignages"
         />

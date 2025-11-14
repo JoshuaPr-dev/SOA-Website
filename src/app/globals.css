@@ -439,9 +439,9 @@ nav ul {
 }
 
 .photo-wrapper {
-  width: 100%; 
+  width: 100%;
   height: 180px;
-  overflow: hidden; 
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1144,7 +1144,7 @@ nav ul {
   }
 
   .imgTopTemoignages {
-    margin-top: 22.5px;
+    margin-top: 44.5px;
   }
 
   .divBlocTemoignages {
@@ -1366,7 +1366,7 @@ nav ul {
   }
 
   .imgTopTemoignages {
-    margin-top: 40px;
+    margin-top: 80.5px;
   }
 }
 
@@ -1485,7 +1485,7 @@ nav ul {
   }
 
   .imgTopTemoignages {
-    margin-top: 57px;
+    margin-top: 89px;
   }
 
   .divBlocTemoignages {
@@ -1572,7 +1572,7 @@ nav ul {
   }
 
   .imgTopTemoignages {
-    margin-top: 57px;
+    margin-top: 107px;
   }
 }
 
@@ -1801,7 +1801,7 @@ nav ul {
   }
 
   .imgTopTemoignages {
-    margin-top: 72px;
+    margin-top: 124px;
   }
 
   .insta {
@@ -1830,7 +1830,7 @@ nav ul {
   }
 
   .imgTopTemoignages {
-    margin-top: 90px;
+    margin-top: 159px;
   }
 }
 
@@ -2304,7 +2304,7 @@ nav ul {
 
   /* Début Témoignages  */
   .imgTopTemoignages {
-    margin-top: 160px;
+    margin-top: 238px;
   }
 
   .h2Temoignages {
@@ -2428,6 +2428,6 @@ nav ul {
   }
 
   .imgTopTemoignages {
-    margin-top: 192px;
+    margin-top: 271px;
   }
 }
