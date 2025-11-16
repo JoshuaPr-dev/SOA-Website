@@ -6,8 +6,9 @@ export default function ConditionsGenerales() {
       <h2 className="h2 h2Footer">CONDITIONS GÉNÉRALES D'UTILISATION (CGU)</h2>
       <h3 className="h3Footer">1. Présentation du site</h3>
       <p className="pFooter">
-        Le présent site, accessible à l’adresse [mettre le nom de domaine du
-        site], est édité par Dorian Prevost, exerçant sous le nom{" "}
+        Le présent site, accessible à l’adresse
+        https://strengthoptimizationacademy.com/, est édité par Dorian Prevost,
+        exerçant sous le nom{" "}
         <span className="spanFooter">Strength Optimization Academy (SOA)</span>.
         <br />
         dorianprevostcoaching@gmail.com <br />
