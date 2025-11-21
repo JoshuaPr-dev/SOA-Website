@@ -22,7 +22,6 @@ export default function TemoignagesPage() {
   const [newPhoto, setNewPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
-
   const uploadPhoto = async (file) => {
     try {
       const fileExt = file.name.split(".").pop();
@@ -46,7 +45,6 @@ export default function TemoignagesPage() {
       throw error;
     }
   };
-
 
   const addTemoignage = async (e) => {
     e.preventDefault();
@@ -141,7 +139,6 @@ export default function TemoignagesPage() {
         <div className="barre"></div>
 
         <main>
-    
           <form
             className="formAdminTemoignages"
             onSubmit={editingId ? (e) => e.preventDefault() : addTemoignage}
@@ -217,7 +214,10 @@ export default function TemoignagesPage() {
                 </button>
               </>
             ) : (
-              <button type="submit" className="buttonAdminTemoignages buttonHover">
+              <button
+                type="submit"
+                className="buttonAdminTemoignages buttonHover"
+              >
                 AJOUTER
               </button>
             )}
