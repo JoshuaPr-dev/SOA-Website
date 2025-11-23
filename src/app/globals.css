@@ -466,6 +466,7 @@ nav ul {
 }
 
 .pTemoignages {
+  white-space: pre-line;
   overflow-wrap: break-word;
   padding-bottom: 20px;
   font-family: var(--font-poppins);

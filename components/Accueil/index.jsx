@@ -6,6 +6,17 @@ import { useSupabase } from "@/context/supabase-provider";
 export default function Accueil() {
   const { supabase } = useSupabase();
 
+  const truncateForDevice = (text) => {
+    if (!text) return "";
+
+    const width = typeof window !== "undefined" ? window.innerWidth : 1200;
+
+    let limit = 200;
+    if (width < 500) limit = 100;
+    else if (width < 900) limit = 150;
+    return text.length > limit ? text.slice(0, limit) + "..." : text;
+  };
+
   const [temoignages, setTemoignages] = useState([]);
   const [loadingTemoignages, setLoadingTemoignages] = useState(true);
   const [indexSlide, setIndexSlide] = useState(0);
@@ -200,7 +211,9 @@ export default function Accueil() {
                             )}
                             <div className="slideText">
                               <h3 className="h3Carousel">{t.nom}</h3>
-                              <p className="pCarousel">{t.message}</p>
+                              <p className="pCarousel">
+                                {truncateForDevice(t.message)}
+                              </p>
                             </div>
                           </div>
                         );
@@ -225,7 +238,9 @@ export default function Accueil() {
                         )}
                         <div className="slideText">
                           <h3 className="h3Carousel">{t.nom}</h3>
-                          <p className="pCarousel">{t.message}</p>
+                          <p className="pCarousel">
+                            {truncateForDevice(t.message)}
+                          </p>
                         </div>
                       </div>
                     );
@@ -253,7 +268,9 @@ export default function Accueil() {
                             )}
                             <div className="slideText">
                               <h3 className="h3Carousel">{t.nom}</h3>
-                              <p className="pCarousel">{t.message}</p>
+                              <p className="pCarousel">
+                                {truncateForDevice(t.message)}
+                              </p>
                             </div>
                           </div>
                         );
