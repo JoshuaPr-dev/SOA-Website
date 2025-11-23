@@ -7,7 +7,6 @@ export default function Coaching() {
           src="/coaching.jpg"
           alt="Test"
           className="imgCoaching"
-          loading="lazy"
         />
         <div>
           <h2 className="h2 h2PageCoaching h2TabletteCoaching">COACHING</h2>
