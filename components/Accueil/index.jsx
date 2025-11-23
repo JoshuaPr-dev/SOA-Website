@@ -8,9 +8,7 @@ export default function Accueil() {
 
   const truncateForDevice = (text) => {
     if (!text) return "";
-
     const width = typeof window !== "undefined" ? window.innerWidth : 1200;
-
     let limit = 200;
     if (width < 500) limit = 100;
     else if (width < 900) limit = 150;
@@ -22,6 +20,28 @@ export default function Accueil() {
   const [indexSlide, setIndexSlide] = useState(0);
   const intervalRef = useRef(null);
 
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    const delta = touchStartX.current - touchEndX.current;
+    if (Math.abs(delta) > 40) {
+      if (delta > 0) next();
+      else prev();
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   useEffect(() => {
     const fetchTemoignages = async () => {
       try {
@@ -31,7 +51,6 @@ export default function Accueil() {
           .order("created_at", { ascending: false });
 
         if (error) {
-          console.error("Erreur récupération témoignages:", error);
           setLoadingTemoignages(false);
           return;
         }
@@ -44,8 +63,7 @@ export default function Accueil() {
                   .from("testimonials-photos")
                   .getPublicUrl(t.photo_url);
                 return { ...t, photo_url: data.publicUrl };
-              } catch (err) {
-                console.error("Erreur génération URL photo:", err);
+              } catch {
                 return t;
               }
             }
@@ -53,17 +71,14 @@ export default function Accueil() {
           })
         );
 
-        // garder tous les témoignages (on affichera 3 par slide)
         setTemoignages(updatedAll || []);
-      } catch (err) {
-        console.error("Erreur fetchTemoignages:", err);
+      } catch {
       } finally {
         setLoadingTemoignages(false);
       }
     };
 
     fetchTemoignages();
-
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
@@ -139,6 +154,7 @@ export default function Accueil() {
         </div>
 
         <div className="barre barreAccueil"></div>
+
         <video
           src="/accueil.mov"
           autoPlay
@@ -147,7 +163,8 @@ export default function Accueil() {
           playsInline
           type="video/quicktime"
           className="video"
-        ></video>
+        />
+
         <div className="flexVideo">
           <div>
             <h2 className="h2">+50 </h2>
@@ -164,14 +181,15 @@ export default function Accueil() {
             <p className="pVideo">compétitions encadrées</p>
           </div>
         </div>
+
         <div className="divButton divButtonCoaching">
           <Link className="button buttonHover" href="/coaching">
             COACHING ET SUIVI
           </Link>
         </div>
+
         <div className="barre"></div>
 
-        {/* Carousel  */}
         <section className="carouselSection">
           <h3 className="h2">TÉMOIGNAGES</h3>
           {loadingTemoignages ? (
@@ -181,57 +199,69 @@ export default function Accueil() {
           ) : (
             <div
               className="carousel"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               onMouseEnter={() => {
                 if (intervalRef.current) clearInterval(intervalRef.current);
               }}
               onMouseLeave={() => startAutoPlay()}
             >
-              {n === 0 ? null : (
+              {n !== 0 && (
                 <div className="slideContent">
-                  {n >= 2
-                    ? (() => {
-                        const prevIdx = (indexSlide - 1 + n) % n;
-                        const t = temoignages[prevIdx];
-                        return (
-                          <div key={t.id} className={`card left`}>
-                            {t.photo_url ? (
-                              <img
-                                src={t.photo_url}
-                                alt={`Photo de ${t.nom}`}
-                                loading="lazy"
-                                className="slidePhoto"
-                                onError={(e) =>
-                                  (e.target.style.display = "none")
-                                }
-                              />
-                            ) : (
-                              <div className="slideAvatar">
-                                {t.nom ? t.nom[0] : "?"}
-                              </div>
-                            )}
-                            <div className="slideText">
-                              <h3 className="h3Carousel">{t.nom}</h3>
-                              <p className="pCarousel">
-                                {truncateForDevice(t.message)}
-                              </p>
+                  {n >= 2 &&
+                    (() => {
+                      const prevIdx = (indexSlide - 1 + n) % n;
+                      const t = temoignages[prevIdx];
+                      return (
+                        <div
+                          key={t.id}
+                          className="card left"
+                          style={{ cursor: "pointer" }}
+                          onClick={() =>
+                            (window.location.href = `/temoignages?focus=${t.id}`)
+                          }
+                        >
+                          {t.photo_url ? (
+                            <img
+                              src={t.photo_url}
+                              alt={`Photo de ${t.nom}`}
+                              loading="lazy"
+                              className="slidePhoto"
+                            />
+                          ) : (
+                            <div className="slideAvatar">
+                              {t.nom ? t.nom[0] : "?"}
                             </div>
+                          )}
+                          <div className="slideText">
+                            <h3 className="h3Carousel">{t.nom}</h3>
+                            <p className="pCarousel">
+                              {truncateForDevice(t.message)}
+                            </p>
                           </div>
-                        );
-                      })()
-                    : null}
+                        </div>
+                      );
+                    })()}
 
                   {(() => {
                     const curIdx = indexSlide % n;
                     const t = temoignages[curIdx];
                     return (
-                      <div key={t.id} className={`card center`}>
+                      <div
+                        key={t.id}
+                        className="card center"
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          (window.location.href = `/temoignages?focus=${t.id}`)
+                        }
+                      >
                         {t.photo_url ? (
                           <img
                             src={t.photo_url}
                             alt={`Photo de ${t.nom}`}
                             loading="lazy"
                             className="slidePhoto"
-                            onError={(e) => (e.target.style.display = "none")}
                           />
                         ) : (
                           <div>{t.nom ? t.nom[0] : "?"}</div>
@@ -245,58 +275,56 @@ export default function Accueil() {
                       </div>
                     );
                   })()}
-                  {n >= 2
-                    ? (() => {
-                        const nextIdx = (indexSlide + 1) % n;
-                        const t = temoignages[nextIdx];
-                        return (
-                          <div key={t.id} className={`card right`}>
-                            {t.photo_url ? (
-                              <img
-                                src={t.photo_url}
-                                alt={`Photo de ${t.nom}`}
-                                loading="lazy"
-                                className="slidePhoto"
-                                onError={(e) =>
-                                  (e.target.style.display = "none")
-                                }
-                              />
-                            ) : (
-                              <div className="slideAvatar">
-                                {t.nom ? t.nom[0] : "?"}
-                              </div>
-                            )}
-                            <div className="slideText">
-                              <h3 className="h3Carousel">{t.nom}</h3>
-                              <p className="pCarousel">
-                                {truncateForDevice(t.message)}
-                              </p>
+
+                  {n >= 2 &&
+                    (() => {
+                      const nextIdx = (indexSlide + 1) % n;
+                      const t = temoignages[nextIdx];
+                      return (
+                        <div
+                          key={t.id}
+                          className="card right"
+                          style={{ cursor: "pointer" }}
+                          onClick={() =>
+                            (window.location.href = `/temoignages?focus=${t.id}`)
+                          }
+                        >
+                          {t.photo_url ? (
+                            <img
+                              src={t.photo_url}
+                              alt={`Photo de ${t.nom}`}
+                              loading="lazy"
+                              className="slidePhoto"
+                            />
+                          ) : (
+                            <div className="slideAvatar">
+                              {t.nom ? t.nom[0] : "?"}
                             </div>
+                          )}
+                          <div className="slideText">
+                            <h3 className="h3Carousel">{t.nom}</h3>
+                            <p className="pCarousel">
+                              {truncateForDevice(t.message)}
+                            </p>
                           </div>
-                        );
-                      })()
-                    : null}
+                        </div>
+                      );
+                    })()}
                 </div>
               )}
 
-              <div className="carousel-dots" role="tablist" aria-label="Slides">
+              <div className="carousel-dots" role="tablist">
                 {Array.from({ length: n }).map((_, d) => (
                   <button
-                    key={`dot-${d}`}
+                    key={d}
                     className={`dot ${d === indexSlide ? "active" : ""}`}
                     disabled
-                    aria-current={d === indexSlide}
-                    aria-label={`Slide ${d + 1}`}
                   />
                 ))}
               </div>
 
               <div className="carousel-controls">
-                <button
-                  onClick={prev}
-                  aria-label="Précédent"
-                  className="buttonFleche"
-                >
+                <button onClick={prev} className="buttonFleche">
                   ‹
                 </button>
                 <Link
@@ -305,11 +333,7 @@ export default function Accueil() {
                 >
                   TÉMOIGNAGES
                 </Link>
-                <button
-                  onClick={next}
-                  aria-label="Suivant"
-                  className="buttonFleche"
-                >
+                <button onClick={next} className="buttonFleche">
                   ›
                 </button>
               </div>
@@ -317,6 +341,7 @@ export default function Accueil() {
           )}
         </section>
       </div>
+
       <div className="bottomImgWrapper">
         <img
           src="/bottomPage.jpeg"
