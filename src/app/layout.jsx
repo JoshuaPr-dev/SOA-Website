@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "SOA - Site Web",
+  title: "SOA",
   description: "Site spécialisé en coaching de Powerlifting",
 };
 
