@@ -88,6 +88,9 @@ export default function Accueil() {
 
   const startAutoPlay = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (typeof window !== "undefined" && window.innerWidth < 900) {
+      return;
+    }
     if (n <= 1) return;
     intervalRef.current = setInterval(() => {
       setIndexSlide((i) => (i + 1) % n);
