@@ -124,7 +124,7 @@ export default function Accueil() {
         <img
           className="topPage"
           src="/topPage.jpeg"
-          alt="Coach avec 3 athlètes"
+          alt="Coach de la structure SOA, spécialisé en Powerlifting avec 3 athlètes"
           loading="lazy"
         />
       </div>
@@ -136,7 +136,7 @@ export default function Accueil() {
           <img
             className="coach"
             src="/coach.png"
-            alt="Photo du coach"
+            alt="Coach de la structure SOA, spécialisé en Powerlifting"
             loading="lazy"
           />
           <div className="blocEnSavoirPlusRelative">
@@ -348,7 +348,7 @@ export default function Accueil() {
       <div className="bottomImgWrapper">
         <img
           src="/bottomPage.jpeg"
-          alt="Coach de dos"
+          alt="Coach de la structure SOA de dos"
           className="bottomImg"
           loading="lazy"
         />

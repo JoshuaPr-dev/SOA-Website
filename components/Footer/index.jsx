@@ -15,7 +15,7 @@ export default function Footer() {
           width="20"
           height="20"
           className="insta linkFooter"
-          alt="Logo Instagram"
+          alt="Logo Instagram pour accéder a la structure SOA"
         />
       </Link>
       <ul>

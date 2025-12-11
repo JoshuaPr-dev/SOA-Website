@@ -5,7 +5,7 @@ export default function Coaching() {
       <div className="divPaddingCoaching">
         <img
           src="/coaching.jpg"
-          alt="Test"
+          alt="Photo de coach SOA avec des athlètes"
           className="imgCoaching"
         />
         <div>

@@ -3,7 +3,7 @@ export default function About() {
     <div className="div_about">
       <h2 className="h2 h2_about h2Mobile">À PROPOS DE MOI</h2>
       <div className="flexAbout">
-        <img src="/coachAbout.png" alt="Photo du coach" className="imgAbout" />
+        <img src="/coachAbout.png" alt="Photo du coach de la structure SOA de face" className="imgAbout" />
         <div className="texteAbout"> 
           <h2 className="h2 h2_about h2TablettePc">À PROPOS DE MOI</h2>
           <p className="p p1About fontP">
